@@ -3,6 +3,8 @@ const app = express();
 
 require("dotenv").config();
 
+require("./config/database.config");
+
 app.use(express.json());
 
 const PORT = process.env.PORT;

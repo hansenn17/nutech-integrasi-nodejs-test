@@ -1,22 +1,23 @@
-const MessageConstant = require("../common/constant/message.constant");
 const InternalStatusCodeConstant = require("../common/constant/internal-status-code.constant");
+const MessageConstant = require("../common/constant/message.constant");
 const ApiResponse = require("../model/api-response.model");
-const UserService = require("../service/user.service");
+const AuthService = require("../service/auth.service");
 
-class UserController {
-  userService;
+class AuthController {
+  authService;
 
   constructor() {
-    this.userService = new UserService();
+    this.authService = new AuthService();
   }
 
-  registerUser = async (req, res) => {
+  login = async (req, res) => {
     try {
-      await this.userService.createUser(req.body);
+      const token = await this.authService.login(req.body);
       return res.json(
         ApiResponse.create(
           InternalStatusCodeConstant.SUCCESS_CODE,
-          MessageConstant.REGISTRATION_SUCCESS_MESSAGE
+          MessageConstant.LOGIN_SUCCESS_MESSAGE,
+          { token }
         )
       );
     } catch (error) {
@@ -24,7 +25,7 @@ class UserController {
         .status(400)
         .json(
           ApiResponse.create(
-            InternalStatusCodeConstant.INVALID_PARAMETER_CODE,
+            InternalStatusCodeConstant.AUTHENTICATION_FAILED_CODE,
             error.message
           )
         );
@@ -32,4 +33,4 @@ class UserController {
   };
 }
 
-module.exports = UserController;
+module.exports = AuthController;

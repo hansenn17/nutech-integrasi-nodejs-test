@@ -39,9 +39,11 @@ exports.up = function (db, callback) {
         description VARCHAR(255),
         total_amount BIGINT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW(),
         CONSTRAINT fk_wallet FOREIGN KEY (wallet_id) REFERENCES wallets (id) ON DELETE CASCADE
       );
+
+      CREATE UNIQUE INDEX idx_users_email ON users (email);
+      CREATE INDEX idx_transactions_created_at ON transactions (created_at);
     `,
     callback
   );

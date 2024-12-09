@@ -20,6 +20,13 @@ class UserService {
         last_name,
         password,
       });
+
+      const isUserExist = await this.userRepository.findByEmail(email);
+
+      if (isUserExist) {
+        throw new Error(`email ${email} telah dipakai`);
+      }
+
       const hashedPassword = await bcrypt.hash(password, 12);
       const id = v4();
       return this.userRepository.create(

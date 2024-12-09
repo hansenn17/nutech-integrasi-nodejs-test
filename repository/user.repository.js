@@ -1,15 +1,29 @@
 const client = require("../config/database.config");
+const WalletService = require("../service/wallet.service");
 
 class UserRepository {
-  async create(id, email, first_name, last_name, password) {
-    const query = {
-      name: "insert-user",
-      text: "INSERT INTO users(id, email, first_name, last_name, password) VALUES($1, $2, $3, $4, $5)",
-      values: [id, email, first_name, last_name, password],
-    };
-    const result = await client.query(query);
+  walletService;
+  constructor() {
+    this.walletService = new WalletService();
+  }
 
-    return result;
+  async create(id, email, first_name, last_name, password) {
+    try {
+      await client.query("BEGIN");
+      const insertUserQuery = {
+        name: "insert-user",
+        text: "INSERT INTO users(id, email, first_name, last_name, password) VALUES($1, $2, $3, $4, $5)",
+        values: [id, email, first_name, last_name, password],
+      };
+      await client.query(insertUserQuery);
+
+      const result = await this.walletService.createWallet(id);
+      await client.query("COMMIT");
+      return result;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw new Error(error.message);
+    }
   }
 
   async findByEmail(email) {

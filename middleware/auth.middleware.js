@@ -5,10 +5,9 @@ const InternalStatusCodeConstant = require("../common/constant/internal-status-c
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header("Author")?.replace("Bearer ", "");
-
+    const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
-      res
+      return res
         .status(401)
         .json(
           ApiResponse.create(
@@ -18,10 +17,11 @@ const auth = async (req, res, next) => {
         );
     }
 
-    jwt.verify(token, process.env.JWT_ACCESS_SECRET_KEY);
+    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    req.email = payload.email;
     next();
   } catch (error) {
-    res
+    return res
       .status(401)
       .json(
         ApiResponse.create(

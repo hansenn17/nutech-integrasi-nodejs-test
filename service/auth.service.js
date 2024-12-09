@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const UserRepository = require("../repository/user.repository");
+const loginDto = require("../dto/user/login.dto");
 
 require("dotenv").config();
 
@@ -13,17 +14,22 @@ class AuthService {
   }
 
   async login(payload) {
-    const { email, password } = payload;
+    try {
+      await loginDto.validate(payload);
+      const { email, password } = payload;
 
-    const user = await this.userRepository.findByEmail(email);
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      const user = await this.userRepository.findByEmail(email);
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-    if (isPasswordCorrect) {
-      const token = this.generateToken(email);
-      return token;
+      if (isPasswordCorrect) {
+        const token = this.generateToken(email);
+        return token;
+      }
+
+      throw new Error("Username atau password salah");
+    } catch (error) {
+      throw new Error(error.message);
     }
-
-    throw new Error("Username atau password salah");
   }
 
   generateToken(email) {
